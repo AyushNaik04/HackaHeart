@@ -42,16 +42,6 @@ Same as Heart Rate, the difference is a bandpass filter must be applied from 0.1
 
 Ac and Dc signals must be obtained from the PPG signal. Dc signal is the mean values of the Red and Blue intensities for the whole period of time, while the Ac Signal is the Standard Deviation and it can be calculated as follows from here : https://en.wikipedia.org/wiki/Standard_deviation 
 
-
-
-ِApplication Apk for testing
--------------------
-
-Direct Link to download the Application to test it:
-https://drive.google.com/file/d/0Bxq6lYtmxVbtN0J6QklOdmRuZVU/view?usp=sharing&resourcekey=0-IaT70S-qZJNk_Aj787PwZA
-
-
-
 References 
 -------------
 
