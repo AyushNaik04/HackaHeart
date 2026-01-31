@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
     android:orientation="vertical"
-    android:paddingLeft="64dp"
-    android:paddingTop="16dp"
-    android:paddingRight="64dp"
-    android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.RespirationProcess">
+    android:background="@drawable/gradient_anim"
+    android:padding="24dp"
+    android:gravity="center">
 
-    <SurfaceView
-        android:id="@+id/preview"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"></SurfaceView>
+    <!-- Title -->
+    <TextView
+        android:id="@+id/respirationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Respiration Measurement"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/textPrimary"
+        android:layout_marginBottom="32dp"/>
 
+    <!-- Horizontal ProgressBar -->
     <ProgressBar
-        android:id="@+id/HRPB"
+        android:id="@+id/respirationProgress"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:progress="0"
+        android:progressDrawable="@drawable/circular_progressbar"
+        android:layout_marginBottom="24dp"/>
 
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
-        android:indeterminate="false"
-        android:max="26"
-        android:progress="1"
-        android:progressDrawable="@drawable/circular_progressbar" />
-
+    <!-- Cancel Button -->
+    <Button
+        android:id="@+id/cancelRespiration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:background="@drawable/rounded_button"
+        android:textColor="@color/buttonTextColor"/>
 </LinearLayout>

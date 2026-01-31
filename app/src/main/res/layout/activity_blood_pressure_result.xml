@@ -1,56 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_blood_pressure_result"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:paddingLeft="64dp"
-    android:paddingTop="16dp"
-    android:paddingRight="64dp"
-    android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.AboutApp">
+    android:background="@drawable/gradient_anim"
+    android:padding="24dp">
 
-    <ImageView
-        android:id="@+id/imageView7"
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:scaleType="fitCenter"
-        app:srcCompat="@mipmap/bpl" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/BPT"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@android:color/transparent"
-        android:text=""
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- Title -->
+        <TextView
+            android:id="@+id/BP_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Blood Pressure Result"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="24dp" />
 
-    <ImageView
-        android:id="@+id/imageView8"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginBottom="140dp"
-        app:srcCompat="@mipmap/bpr" />
+        <!-- Systolic Value -->
+        <TextView
+            android:id="@+id/BP_systolic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="120 mmHg"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:background="@drawable/textinputborder"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp" />
 
-    <ImageButton
-        android:id="@+id/SendBP"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:layout_marginBottom="40dp"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        app:srcCompat="@mipmap/send" />
+        <!-- Diastolic Value -->
+        <TextView
+            android:id="@+id/BP_diastolic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="80 mmHg"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:background="@drawable/textinputborder"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp" />
 
+        <!-- Category Display -->
+        <TextView
+            android:id="@+id/BP_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Normal"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#388E3C"
+            android:padding="10dp"
+            android:layout_marginBottom="16dp" />
 
-</LinearLayout>
+        <!-- Advice Text -->
+        <TextView
+            android:id="@+id/BP_advice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Maintain a healthy lifestyle and regular checkups."
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:padding="16dp"
+            android:background="@drawable/textinputborder"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Horizontal layout for action buttons -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Share Button -->
+            <ImageButton
+                android:id="@+id/SendBP"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_menu_share"
+                android:contentDescription="Share Blood Pressure"
+                android:layout_marginEnd="16dp" />
+
+            <!-- Copy Button -->
+            <ImageButton
+                android:id="@+id/CopyBP"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_menu_save"
+                android:contentDescription="Copy Blood Pressure"
+                android:layout_marginEnd="16dp" />
+
+            <!-- Retake Button -->
+            <Button
+                android:id="@+id/RetakeBP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Retake"
+                android:textStyle="bold"
+                android:backgroundTint="#6200EE"
+                android:textColor="@android:color/white"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="10dp" />
+        </LinearLayout>
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="40dp" />
+
+    </LinearLayout>
+</ScrollView>
 

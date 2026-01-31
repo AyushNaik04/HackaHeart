@@ -15,58 +15,73 @@ import java.util.Date;
 
 public class VitalSignsResults extends AppCompatActivity {
 
-    private String user, Date;
-    DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-    Date today = Calendar.getInstance().getTime();
-    int VBP1, VBP2, VRR, VHR, VO2;
+    private String user;
+    private String measurementDate;
+
+    private int systolicBP, diastolicBP, respirationRate, heartRate, oxygenSaturation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vital_signs_results);
 
-        Date = df.format(today);
-        TextView VSRR = this.findViewById(R.id.RRV);
-        TextView VSBPS = this.findViewById(R.id.BP2V);
-        TextView VSHR = this.findViewById(R.id.HRV);
-        TextView VSO2 = this.findViewById(R.id.O2V);
-        ImageButton All = this.findViewById(R.id.SendAll);
+        // Initialize date
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        Date today = Calendar.getInstance().getTime();
+        measurementDate = df.format(today);
 
+        // UI elements
+        TextView tvRespiration = findViewById(R.id.RRV);
+        TextView tvBloodPressure = findViewById(R.id.BP2V);
+        TextView tvHeartRate = findViewById(R.id.HRV);
+        TextView tvOxygen = findViewById(R.id.O2V);
+        ImageButton btnSendAll = findViewById(R.id.SendAll);
+
+        // Retrieve data from Intent
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            VRR = bundle.getInt("breath");
-            VHR = bundle.getInt("bpm");
-            VBP1 = bundle.getInt("SP");
-            VBP2 = bundle.getInt("DP");
-            VO2 = bundle.getInt("O2R");
-            user = bundle.getString("Usr");
-            VSRR.setText(String.valueOf(VRR));
-            VSHR.setText(String.valueOf(VHR));
-            VSBPS.setText(VBP1 + " / " + VBP2);
-            VSO2.setText(String.valueOf(VO2));
+            respirationRate = bundle.getInt("RR", 0);
+            heartRate = bundle.getInt("HR", 0);
+            systolicBP = bundle.getInt("SP", 0);
+            diastolicBP = bundle.getInt("DP", 0);
+            oxygenSaturation = bundle.getInt("SpO2", 0);
+            user = bundle.getString("Usr", "User");
+
+            // Update UI
+            tvRespiration.setText(String.valueOf(respirationRate));
+            tvHeartRate.setText(String.valueOf(heartRate));
+            tvBloodPressure.setText(systolicBP + " / " + diastolicBP);
+            tvOxygen.setText(String.valueOf(oxygenSaturation));
         }
 
-        All.setOnClickListener(v -> {
-            Intent i = new Intent(Intent.ACTION_SEND);
-            i.setType("message/rfc822");
-            i.putExtra(Intent.EXTRA_EMAIL, new String[]{"recipient@example.com"});
-            i.putExtra(Intent.EXTRA_SUBJECT, "Health Watcher");
-            i.putExtra(Intent.EXTRA_TEXT, user + "'s new measuerment " + "\n" + " at " + Date + " are :" + "\n" + "Heart Rate = " + VHR + "\n" + "Blood Pressure = " + VBP1 + " / " + VBP2 + "\n" + "Respiration Rate = " + VRR + "\n" + "Oxygen Saturation = " + VO2);
+        // Send all measurements via email
+        btnSendAll.setOnClickListener(v -> {
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+            emailIntent.setType("message/rfc822");
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"recipient@example.com"});
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Health Watcher Vital Signs Report");
+            emailIntent.putExtra(Intent.EXTRA_TEXT,
+                    user + "'s latest measurements (" + measurementDate + "):\n\n" +
+                            "Heart Rate: " + heartRate + " BPM\n" +
+                            "Blood Pressure: " + systolicBP + " / " + diastolicBP + " mmHg\n" +
+                            "Respiration Rate: " + respirationRate + " breaths/min\n" +
+                            "Oxygen Saturation: " + oxygenSaturation + "%\n"
+            );
             try {
-                startActivity(Intent.createChooser(i, "Send mail..."));
+                startActivity(Intent.createChooser(emailIntent, "Send via email..."));
             } catch (android.content.ActivityNotFoundException ex) {
-                Toast.makeText(VitalSignsResults.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No email clients installed.", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        // Return to main menu
         Intent i = new Intent(VitalSignsResults.this, Primary.class);
         i.putExtra("Usr", user);
         startActivity(i);
         finish();
     }
 }
+

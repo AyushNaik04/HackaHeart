@@ -1,74 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_primary"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.Primary">
+    android:background="@drawable/gradient_anim"
+    android:padding="16dp">
 
-
-    <ImageView
-        android:id="@+id/imageView"
+    <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="110dp"
-        app:srcCompat="@mipmap/logo" />
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:rowCount="4"
+        android:alignmentMode="alignMargins"
+        android:columnOrderPreserved="false"
+        android:rowOrderPreserved="false"
+        android:layout_gravity="center">
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="10dp" />
+        <!-- Heart Rate -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:padding="8dp">
 
-    <ImageButton
-        android:id="@+id/HR"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/hr1" />
+            <ImageButton
+                android:id="@+id/HR"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_menu_info_details"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="Heart Rate"/>
 
-    <ImageButton
-        android:id="@+id/RR"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/rr1" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Heart Rate"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+        </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/BP"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/bp1" />
+        <!-- Blood Pressure -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:padding="8dp">
 
-    <ImageButton
-        android:id="@+id/O2"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/or1" />
+            <ImageButton
+                android:id="@+id/BP"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_menu_compass"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="Blood Pressure"/>
 
-    <ImageButton
-        android:id="@+id/VS"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/avs" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Blood Pressure"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+        </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/About"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_gravity="right"
-        android:background="@android:color/transparent"
-        android:scaleType="fitEnd"
-        app:srcCompat="@mipmap/ab" />
+        <!-- Oxygen -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:padding="8dp">
 
+            <ImageButton
+                android:id="@+id/O2"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="Oxygen Saturation"/>
 
-</LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oxygen"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- Respiration -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageButton
+                android:id="@+id/RR"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_menu_manage"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="Respiration Rate"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Respiration"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- Vital Signs -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageButton
+                android:id="@+id/VS"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_menu_agenda"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="Vital Signs"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vital Signs"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- About -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageButton
+                android:id="@+id/About"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_menu_help"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="About App"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="About"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- Glucose -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <ImageButton
+                android:id="@+id/Glucose"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_menu_edit"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="Glucose"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Glucose"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+    </GridLayout>
+</ScrollView>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_anim"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tvHeartRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Heart Rate: -- bpm"
+            android:textSize="18sp"
+            android:textColor="@color/textPrimary"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/tvSpO2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SpO2: -- %"
+            android:textSize="18sp"
+            android:textColor="@color/textPrimary"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/tvGlucose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Estimated Glucose: -- mg/dL"
+            android:textSize="18sp"
+            android:textColor="@color/textPrimary"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/btnStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start Measurement"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/rounded_button"
+            android:textColor="@color/buttonTextColor"/>
+
+    </LinearLayout>
+</ScrollView>
+

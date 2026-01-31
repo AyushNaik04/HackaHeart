@@ -1,323 +1,342 @@
 package com.example.yo7a.healthwatcher;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.healthwatcher.Math.Fft;
-
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static java.lang.Math.ceil;
 
 public class BloodPressureProcess extends Activity {
 
-    // Variables Initialization
-    private static final String TAG = "HeartRateMonitor";
+    private static final String TAG = "BloodPressureProcess";
     private static final AtomicBoolean processing = new AtomicBoolean(false);
-    private SurfaceView preview = null;
-    private static SurfaceHolder previewHolder = null;
-    private static Camera camera = null;
-    private static WakeLock wakeLock = null;
 
-    //Toast
+    // UI
+    private ProgressBar progBP;
+    private int progP = 0;
     private Toast mainToast;
 
-    //DataBase
-    public String user;
-    UserDB Data = new UserDB(this);
+    // Camera & PPG
+    private SurfaceView preview;
+    private SurfaceHolder previewHolder;
+    private Camera camera;
+    private PowerManager.WakeLock wakeLock;
 
-    //ProgressBar
-    private ProgressBar ProgBP;
-    public int ProgP = 0;
-    public int inc = 0;
+    // User data
+    private String user;
+    private UserDB Data;
+    private int age = 30, height = 170, weight = 70, gender = 0;
 
-    //Beats variable
-    public int Beats = 0;
-    public double bufferAvgB = 0;
+    // Buffers & timing
+    private final ArrayList<Double> redAvgList = new ArrayList<>();
+    private final ArrayList<Double> greenAvgList = new ArrayList<>();
+    private long startTime = 0L;
+    private int frameCounter = 0;
+    private double samplingFreq = 0.0;
 
-    //Freq + timer variable
-    private static long startTime = 0;
-    private double SamplingFreq;
+    // Result smoothing/history
+    private final Deque<Integer> recentHrDeque = new ArrayDeque<>(6);
 
-    //BloodPressure variables
-    public double Gen, Agg, Hei, Wei;
-    public double Q = 4.5;
-    private static int SP = 0, DP = 0;
+    // Blood pressure results
+    private int SP = 0, DP = 0;
 
-    //Arraylist
-    public ArrayList<Double> GreenAvgList = new ArrayList<Double>();
-    public ArrayList<Double> RedAvgList = new ArrayList<Double>();
-    public int counter = 0;
+    // Constants & thresholds
+    private static final double REQUIRED_SECONDS_MIN = 12.0;
+    private static final double REQUIRED_SECONDS_MAX = 30.0;
+    private static final int MIN_FRAMES = 40;
+    private static final int MIN_HR = 40;
+    private static final int MAX_HR = 200;
+    private static final double SNR_THRESHOLD = 4.0;
+    private static final double CALIBRATION_MULTIPLIER = 1.0;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blood_pressure_process);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            user = extras.getString("Usr");
-            //The key argument here must match that used in the other activity
-        }
+        user = getIntent().getStringExtra("Usr");
+        Data = new UserDB(getApplicationContext());
 
-        Hei = Integer.parseInt(Data.getheight(user));
-        Wei = Integer.parseInt(Data.getweight(user));
-        Agg = Integer.parseInt(Data.getage(user));
-        Gen = Integer.parseInt(Data.getgender(user));
+        // FIXED: Assign integers directly
+        try { age = Data.getage(user); } catch (Exception ignored) {}
+        try { height = Data.getheight(user); } catch (Exception ignored) {}
+        try { weight = Data.getweight(user); } catch (Exception ignored) {}
+        try { gender = Data.getgender(user); } catch (Exception ignored) {}
 
-        if (Gen == 1) {
-            Q = 5;
-        }
+        progBP = findViewById(R.id.BPPB);
+        if (progBP != null) progBP.setProgress(0);
 
-        // XML - Java Connecting
         preview = findViewById(R.id.preview);
         previewHolder = preview.getHolder();
         previewHolder.addCallback(surfaceCallback);
-        previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        ProgBP = findViewById(R.id.BPPB);
-        ProgBP.setProgress(0);
 
-        // WakeLock Initialization : Forces the phone to stay On
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        if (pm != null) wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "HealthWatcher:BP");
     }
 
-    //Prevent the system from restarting your activity during certain configuration changes,
-    // but receive a callback when the configurations do change, so that you can manually update your activity as necessary.
-    //such as screen orientation, keyboard availability, and language
-
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
-
-    //Wakelock + Open device camera + set orientation to 90 degree
-    //store system time as a start time for the analyzing process
-    //your activity to start interacting with the user.
-    // This is a good place to begin animations, open exclusive-access devices (such as the camera)
-    @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
-
-        wakeLock.acquire();
-
-        camera = Camera.open();
-
-        camera.setDisplayOrientation(90);
-
+        try { if (wakeLock != null && !wakeLock.isHeld()) wakeLock.acquire(); } catch (Exception ignored) {}
+        try {
+            camera = Camera.open();
+            camera.setDisplayOrientation(90);
+        } catch (Exception e) {
+            showShortToast("Camera not available");
+            finish();
+            return;
+        }
         startTime = System.currentTimeMillis();
+        resetBuffers();
     }
 
-    //call back the frames then release the camera + wakelock and Initialize the camera to null
-    //Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been killed. The counterpart to onResume().
-    //When activity B is launched in front of activity A,
-    // this callback will be invoked on A. B will not be created until A's onPause() returns, so be sure to not do anything lengthy here.
     @Override
-    public void onPause() {
+    protected void onPause() {
         super.onPause();
-        wakeLock.release();
-        camera.setPreviewCallback(null);
-        camera.stopPreview();
-        camera.release();
-        camera = null;
-
+        try { if (wakeLock != null && wakeLock.isHeld()) wakeLock.release(); } catch (Exception ignored) {}
+        releaseCamera();
     }
 
+    private void releaseCamera() {
+        if (camera != null) {
+            try { camera.setPreviewCallback(null); } catch (Exception ignored) {}
+            try { camera.stopPreview(); } catch (Exception ignored) {}
+            try { camera.release(); } catch (Exception ignored) {}
+            camera = null;
+        }
+    }
 
-    //getting frames data from the camera and start the heartbeat process
-    private final PreviewCallback previewCallback = new PreviewCallback() {
+    private final Camera.PreviewCallback previewCallback = (data, cam) -> {
+        if (data == null || cam == null) return;
+        if (!processing.compareAndSet(false, true)) return;
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onPreviewFrame(byte[] data, Camera cam) {
-            //if data or size == null ****
-            if (data == null) throw new NullPointerException();
+        try {
             Camera.Size size = cam.getParameters().getPreviewSize();
-            if (size == null) throw new NullPointerException();
+            if (size == null) { processing.set(false); return; }
 
-            //Atomically sets the value to the given updated value if the current value == the expected value.
-            if (!processing.compareAndSet(false, true)) return;
+            double greenAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data, size.width, size.height, 3);
+            double redAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data, size.width, size.height, 1);
 
-            //put width + height of the camera inside the variables
-            int width = size.width;
-            int height = size.height;
-
-            double GreenAvg;
-            double RedAvg;
-
-            GreenAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 3); //1 stands for red intensity, 2 for blue, 3 for green
-            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1);  //1 stands for red intensity, 2 for blue, 3 for green
-
-            GreenAvgList.add(GreenAvg);
-            RedAvgList.add(RedAvg);
-
-            ++counter; //countes number of frames in 30 seconds
-
-
-            //To check if we got a good red intensity to process if not return to the condition and set it again until we get a good red intensity
-            if (RedAvg < 200) {
-                inc = 0;
-                ProgP = inc;
-                counter = 0;
-                ProgBP.setProgress(ProgP);
+            if (greenAvg < 35.0 && redAvg < 35.0) {
+                if (frameCounter == 0) showShortToast("Place your finger firmly on the camera lens");
                 processing.set(false);
+                return;
             }
 
-            long endTime = System.currentTimeMillis();
-            double totalTimeInSecs = (endTime - startTime) / 1000d; //to convert time to seconds
-            if (totalTimeInSecs >= 30) { //when 30 seconds of measuring passes do the following " we chose 30 seconds to take half sample since 60 seconds is normally a full sample of the heart beat
+            greenAvgList.add(greenAvg);
+            redAvgList.add(redAvg);
+            frameCounter++;
 
+            long now = System.currentTimeMillis();
+            double elapsedSec = (now - startTime) / 1000.0;
+            if (elapsedSec > 0.5) samplingFreq = frameCounter / elapsedSec;
 
-                Double[] Green = GreenAvgList.toArray(new Double[GreenAvgList.size()]);
-                Double[] Red = RedAvgList.toArray(new Double[RedAvgList.size()]);
+            if (progBP != null) {
+                int p = Math.min(100, (int) Math.round(Math.min(elapsedSec / REQUIRED_SECONDS_MAX, 1.0) * 100.0));
+                progBP.setProgress(p);
+            }
 
-                SamplingFreq = (counter / totalTimeInSecs); //calculating the sampling frequency
+            if (elapsedSec >= REQUIRED_SECONDS_MIN && frameCounter >= MIN_FRAMES) {
+                int desiredFrames = (int) Math.round(Math.max(MIN_FRAMES, REQUIRED_SECONDS_MAX * Math.max(1.0, samplingFreq)));
+                while (greenAvgList.size() > desiredFrames) {
+                    greenAvgList.remove(0);
+                    redAvgList.remove(0);
+                }
+                frameCounter = greenAvgList.size();
 
-                double HRFreq = Fft.FFT(Green, counter, SamplingFreq); // send the green array and get its fft then return the amount of heartrate per second
-                double bpm = (int) ceil(HRFreq * 60);
-                double HR1Freq = Fft.FFT(Red, counter, SamplingFreq);  // send the red array and get its fft then return the amount of heartrate per second
-                double bpm1 = (int) ceil(HR1Freq * 60);
+                int N = frameCounter;
+                if (N < MIN_FRAMES) { processing.set(false); return; }
 
-                // The following code is to make sure that if the heartrate from red and green intensities are reasonable
-                // take the average between them, otherwise take the green or red if one of them is good
+                double[] samples = new double[N];
+                for (int i = 0; i < N; i++) samples[i] = greenAvgList.get(i);
 
-                if ((bpm > 45 || bpm < 200)) {
-                    if ((bpm1 > 45 || bpm1 < 200)) {
+                SignalProcessing.removeLinearTrend(samples);
+                SignalProcessing.applyHammingWindow(samples);
 
-                        bufferAvgB = (bpm + bpm1) / 2;
-                    } else {
-                        bufferAvgB = bpm;
-                    }
-                } else if ((bpm1 > 45 || bpm1 < 200)) {
+                double minHz = 0.7, maxHz = 4.0;
+                double[] outSNR = new double[1];
+                double freqHz = SignalProcessing.findDominantFrequencyHz(samples, samplingFreq, minHz, maxHz, outSNR);
+                double snr = (outSNR != null && outSNR.length > 0) ? outSNR[0] : 0.0;
 
-                    bufferAvgB = bpm1;
-
+                if (Double.isNaN(freqHz) || freqHz <= 0 || snr < SNR_THRESHOLD) {
+                    for (int i = 0; i < N; i++) samples[i] = redAvgList.get(i);
+                    SignalProcessing.removeLinearTrend(samples);
+                    SignalProcessing.applyHammingWindow(samples);
+                    freqHz = SignalProcessing.findDominantFrequencyHz(samples, samplingFreq, minHz, maxHz, outSNR);
+                    snr = (outSNR != null && outSNR.length > 0) ? outSNR[0] : 0.0;
                 }
 
-                if (bufferAvgB < 45 || bufferAvgB > 200) {
-                    inc = 0;
-                    ProgP = inc;
-                    ProgBP.setProgress(ProgP);
-                    mainToast = Toast.makeText(getApplicationContext(), "Measurement Failed", Toast.LENGTH_SHORT);
-                    mainToast.show();
-                    startTime = System.currentTimeMillis();
-                    counter = 0;
+                int hr = (freqHz > 0 && !Double.isNaN(freqHz)) ? (int) Math.round(freqHz * 60.0) : 0;
+
+                if (hr < MIN_HR || hr > MAX_HR || snr < SNR_THRESHOLD) {
+                    if (elapsedSec >= REQUIRED_SECONDS_MAX) {
+                        showShortToast("Measurement failed — reposition finger and try again");
+                        resetBuffers();
+                        startTime = System.currentTimeMillis();
+                    }
                     processing.set(false);
                     return;
                 }
 
-                Beats = (int) bufferAvgB;
+                if (recentHrDeque.size() == 6) recentHrDeque.pollFirst();
+                recentHrDeque.offerLast(hr);
+                int finalHr = medianOfDeque(recentHrDeque);
 
+                double Qfactor = (gender == 1) ? 5.0 : 4.5;
                 double ROB = 18.5;
-                double ET = (364.5 - 1.23 * Beats);
-                double BSA = 0.007184 * (Math.pow(Wei, 0.425)) * (Math.pow(Hei, 0.725));
-                double SV = (-6.6 + (0.25 * (ET - 35)) - (0.62 * Beats) + (40.4 * BSA) - (0.51 * Agg));
-                double PP = SV / ((0.013 * Wei - 0.007 * Agg - 0.004 * Beats) + 1.307);
-                double MPP = Q * ROB;
+                double ET = 364.5 - 1.23 * finalHr;
+                double BSA = 0.007184 * Math.pow(weight, 0.425) * Math.pow(height, 0.725);
+                double SV = -6.6 + 0.25 * (ET - 35) - 0.62 * finalHr + 40.4 * BSA - 0.51 * age;
+                if (Double.isNaN(SV) || SV <= 0) SV = Math.max(20.0, SV);
+                double PP = SV / ((0.013 * weight - 0.007 * age - 0.004 * finalHr) + 1.307);
+                if (Double.isNaN(PP) || PP <= 0) PP = 30.0;
+                double MPP = Qfactor * ROB;
+                double spRaw = (MPP + 1.5 * PP) * CALIBRATION_MULTIPLIER;
+                double dpRaw = (MPP - PP / 3.0) * CALIBRATION_MULTIPLIER;
+                SP = (int) Math.round(spRaw);
+                DP = (int) Math.round(dpRaw);
 
-                SP = (int) (MPP + 3 / 2 * PP);
-                DP = (int) (MPP - PP / 3);
+                if (SP < 70 || SP > 260 || DP < 40 || DP > 180) {
+                    if (elapsedSec >= REQUIRED_SECONDS_MAX) {
+                        showShortToast("BP estimation failed — try again");
+                        resetBuffers();
+                        startTime = System.currentTimeMillis();
+                    }
+                    processing.set(false);
+                    return;
+                }
 
+                double snrScore = Math.min(1.0, snr / (SNR_THRESHOLD * 2.0));
+                double hrStability = computeStabilityScore(recentHrDeque);
+                double confidence = 0.6 * snrScore + 0.4 * hrStability;
+
+                if (confidence < 0.45 && elapsedSec < REQUIRED_SECONDS_MAX) {
+                    processing.set(false);
+                    return;
+                }
+
+                new Thread(() -> {
+                    try {
+                        int local = progP;
+                        while (local <= 100) {
+                            final int val = local;
+                            runOnUiThread(() -> {
+                                if (progBP != null) progBP.setProgress(val);
+                            });
+                            Thread.sleep(15);
+                            local++;
+                        }
+                    } catch (InterruptedException ignored) {}
+                }).start();
+
+                resetBuffers();
+                processing.set(false);
             }
 
-            if ((SP != 0) && (DP != 0)) {
-                Intent i = new Intent(BloodPressureProcess.this, BloodPressureResult.class);
-                i.putExtra("SP", SP);
-                i.putExtra("DP", DP);
-                i.putExtra("Usr", user);
-                startActivity(i);
-                finish();
-            }
-
-
-            if (RedAvg != 0) {
-                ProgP = inc++ / 34;
-                ProgBP.setProgress(ProgP);
-            }
+        } catch (Exception e) {
+            Log.e(TAG, "Frame processing error", e);
+        } finally {
             processing.set(false);
-
         }
     };
 
     private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
-
-
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
-                camera.setPreviewDisplay(previewHolder);
-                camera.setPreviewCallback(previewCallback);
+                if (camera != null) {
+                    camera.setPreviewDisplay(previewHolder);
+                    camera.setPreviewCallback(previewCallback);
+                }
             } catch (Throwable t) {
-                Log.e("PreviewDemo-surfaceCallback", "Exception in setPreviewDisplay()", t);
+                Log.e(TAG, "Exception in setPreviewDisplay()", t);
             }
         }
-
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-            Camera.Parameters parameters = camera.getParameters();
-            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-
-            Camera.Size size = getSmallestPreviewSize(width, height, parameters);
-            if (size != null) {
-                parameters.setPreviewSize(size.width, size.height);
-                Log.d(TAG, "Using width=" + size.width + " height=" + size.height);
+            if (camera == null) return;
+            try {
+                Camera.Parameters params = camera.getParameters();
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                Camera.Size size = getSmallestPreviewSize(width, height, params);
+                if (size != null) params.setPreviewSize(size.width, size.height);
+                camera.setParameters(params);
+                camera.startPreview();
+            } catch (Exception e) {
+                Log.e(TAG, "Error starting preview", e);
             }
-
-            camera.setParameters(parameters);
-            camera.startPreview();
         }
-
 
         @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            // Ignore
-        }
+        public void surfaceDestroyed(SurfaceHolder holder) {}
     };
 
     private static Camera.Size getSmallestPreviewSize(int width, int height, Camera.Parameters parameters) {
         Camera.Size result = null;
-
         for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
             if (size.width <= width && size.height <= height) {
-                if (result == null) {
+                if (result == null || size.width * size.height < result.width * result.height)
                     result = size;
-                } else {
-                    int resultArea = result.width * result.height;
-                    int newArea = size.width * size.height;
-
-                    if (newArea < resultArea) result = size;
-                }
             }
         }
-
         return result;
+    }
+
+    private void resetBuffers() {
+        redAvgList.clear();
+        greenAvgList.clear();
+        frameCounter = 0;
+        startTime = System.currentTimeMillis();
+        samplingFreq = 0.0;
+        recentHrDeque.clear();
+        progP = 0;
+        if (progBP != null) progBP.setProgress(0);
+    }
+
+    private int medianOfDeque(Deque<Integer> dq) {
+        if (dq.isEmpty()) return 0;
+        int n = dq.size();
+        int[] arr = new int[n];
+        int i = 0;
+        for (int v : dq) arr[i++] = v;
+        java.util.Arrays.sort(arr);
+        return arr[n / 2];
+    }
+
+    private double computeStabilityScore(Deque<Integer> dq) {
+        if (dq.isEmpty()) return 0.0;
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        for (int v : dq) {
+            min = Math.min(min, v);
+            max = Math.max(max, v);
+        }
+        double span = Math.max(1.0, max - min);
+        return Math.max(0.0, 1.0 - (span / 10.0));
+    }
+
+    private void showShortToast(String msg) {
+        if (mainToast != null) mainToast.cancel();
+        mainToast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT);
+        mainToast.show();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Intent i = new Intent(BloodPressureProcess.this, StartVitalSigns.class);
-        i.putExtra("Usr", user);
-        startActivity(i);
         finish();
     }
 
+    public int getSP() { return SP; }
+    public int getDP() { return DP; }
 }

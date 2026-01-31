@@ -48,17 +48,14 @@ public class RespirationResult extends AppCompatActivity {
                 Toast.makeText(RespirationResult.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     @Override
     public void onBackPressed() {
-
         Intent i = new Intent(RespirationResult.this, Primary.class);
         i.putExtra("Usr", user);
         startActivity(i);
         finish();
         super.onBackPressed();
-
     }
 }

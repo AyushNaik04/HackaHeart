@@ -1,39 +1,68 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "25.0.3"
+    namespace "com.example.yo7a.healthwatcher"
+    compileSdk 34
+
     defaultConfig {
         applicationId "com.example.yo7a.healthwatcher"
-        minSdkVersion 19
-        targetSdkVersion 29
+        minSdk 21
+        targetSdk 34
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Enables support for vector drawables on API < 21
+        vectorDrawables.useSupportLibrary = true
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+
+    buildFeatures {
+        viewBinding true
     }
-    productFlavors {
-    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
+// CameraX version defined at top
+def camerax_version = "1.3.1"
+
 dependencies {
-    //implementation fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('androidx.test.espresso:espresso-core:3.1.0', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    testImplementation 'junit:junit:4.12'
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
-    //compile files('lib/commons-math3-3.6.1.jar')
+    // Core Android
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.core:core-ktx:1.12.0"
+
+    // CameraX for Android 14 support
+    implementation "androidx.camera:camera-core:$camerax_version"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
+    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+    implementation "androidx.camera:camera-view:$camerax_version"
+    implementation "androidx.camera:camera-extensions:$camerax_version"
+
+    // Math for signal processing
+    implementation "org.apache.commons:commons-math3:3.6.1"
+
+    // Lifecycle + Material (UI + background safety)
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.2"
+    implementation "com.google.android.material:material:1.11.0"
+
+    // MPAndroidChart for live glucose graph
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Testing
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "androidx.test:runner:1.5.2"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
+    androidTestImplementation "androidx.test.ext:junit:1.1.5"
 }
+

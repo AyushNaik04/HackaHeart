@@ -3,7 +3,7 @@ package com.example.yo7a.healthwatcher;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,49 +14,51 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-
 public class HeartRateResult extends AppCompatActivity {
 
-    private String user, Date;
-    int HR;
-    DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-    Date today = Calendar.getInstance().getTime();
+    private String user;
+    private int HR;
+    private DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    private Date today = Calendar.getInstance().getTime();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heart_rate_result);
 
-        Date = df.format(today);
-        TextView RHR = this.findViewById(R.id.HRR);
-        ImageButton SHR = this.findViewById(R.id.SendHR);
+        String currentDate = df.format(today);
 
+        // Updated IDs matching the XML layout
+        TextView RHR = findViewById(R.id.HRR);
+        TextView MHR = findViewById(R.id.MHR);
+        TextView AHR = findViewById(R.id.AHR);
+        Button btnBack = findViewById(R.id.btnBack);
+
+        // Get intent data
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            HR = bundle.getInt("bpm");
-            user = bundle.getString("Usr");
-            Log.d("DEBUG_TAG", "ccccc" + user);
-            RHR.setText(String.valueOf(HR));
+            HR = bundle.getInt("bpm", 0);
+            user = bundle.getString("Usr", "Unknown");
+            Log.d("DEBUG_TAG", "User: " + user);
+            RHR.setText("Resting Heart Rate: " + HR + " bpm");
+
+            // Optional placeholders for MHR and AHR
+            MHR.setText("Max Heart Rate: " + (HR + 20) + " bpm");       // Replace with real value if available
+            AHR.setText("Average Heart Rate: " + (HR - 5) + " bpm");    // Replace with real value if available
         }
 
-        SHR.setOnClickListener(v -> {
-            Intent i = new Intent(Intent.ACTION_SEND);
-            i.setType("message/rfc822");
-            i.putExtra(Intent.EXTRA_EMAIL, new String[]{"recipient@example.com"});
-            i.putExtra(Intent.EXTRA_SUBJECT, "Health Watcher");
-            i.putExtra(Intent.EXTRA_TEXT, user + "'s Heart Rate " + "\n" + " at " + Date + " is :    " + HR);
-            try {
-                startActivity(Intent.createChooser(i, "Send mail..."));
-            } catch (android.content.ActivityNotFoundException ex) {
-                Toast.makeText(HeartRateResult.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-            }
+        // Back button listener
+        btnBack.setOnClickListener(v -> {
+            Intent i = new Intent(HeartRateResult.this, Primary.class);
+            i.putExtra("Usr", user);
+            startActivity(i);
+            finish();
         });
-
     }
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        // Override to navigate to Primary activity
         Intent i = new Intent(HeartRateResult.this, Primary.class);
         i.putExtra("Usr", user);
         startActivity(i);

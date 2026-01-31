@@ -5,6 +5,9 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+// ✅ Add this line
+import com.example.yo7a.healthwatcher.R;
+
 public class AboutApp extends AppCompatActivity {
 
     private String user;
@@ -21,12 +24,10 @@ public class AboutApp extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
         Intent i = new Intent(AboutApp.this, Primary.class);
         i.putExtra("Usr", user);
         startActivity(i);
         finish();
         super.onBackPressed();
-
     }
 }

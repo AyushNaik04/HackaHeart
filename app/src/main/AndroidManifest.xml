@@ -2,87 +2,50 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.yo7a.healthwatcher">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.flash" />
-
-    <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/logo"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/logo"
+        android:icon="@mipmap/ic_launcher"
+        android:label="HackaHeart"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
+        android:theme="@style/AppTheme">
+
+        <!-- Launcher Activity -->
         <activity
             android:name=".First"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Primary"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".AboutApp"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".O2Result"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".BloodPressureResult"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".HeartRateResult"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".RespirationResult"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".HeartRateProcess"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".BloodPressureProcess"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".O2Process"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".Login"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".RespirationProcess"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".StartVitalSigns"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".VitalSignsProcess"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".VitalSignsResults"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
+
+        <!-- Other Activities -->
+        <activity android:name=".AboutApp" android:exported="false" />
+        <activity android:name=".BloodPressureProcess" android:exported="false" />
+        <activity android:name=".BloodPressureResult" android:exported="false" />
+        <activity android:name=".HeartRateProcess" android:exported="false" />
+        <activity android:name=".HeartRateResult" android:exported="false" />
+        <activity android:name=".Login" android:exported="false" />
+        <activity android:name=".O2Process" android:exported="false" />
+        <activity android:name=".O2Result" android:exported="false" />
+        <activity android:name=".Primary" android:exported="false" />
+        <activity android:name=".RespirationProcess" android:exported="false" />
+        <activity android:name=".RespirationResult" android:exported="false" />
+        <activity android:name=".StartVitalSigns" android:exported="false" />
+        <activity android:name=".VitalSignsProcess" android:exported="false" />
+        <activity android:name=".VitalSignsResults" android:exported="false" />
+        <activity android:name=".GlucoseActivity" android:exported="false" />
+
     </application>
 
 </manifest>

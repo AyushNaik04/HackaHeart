@@ -1,279 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/loginRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_login_base">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/activity_login"
+    <!-- Soft purple bloom overlay (KEY LAYER) -->
+    <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@mipmap/bg4"
+        android:background="@drawable/bg_color_tint" />
+
+    <!-- CONTENT -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
         android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingTop="16dp"
-        android:paddingRight="16dp"
-        android:paddingBottom="16dp"
-        android:weightSum="1"
-        tools:context="com.example.yo7a.healthwatcher.Login">
+        android:padding="24dp">
 
-
-        <TextView
-            android:id="@+id/tva"
-            android:layout_width="match_parent"
+        <!-- Glass Login Card -->
+        <LinearLayout
+            android:layout_width="320dp"
             android:layout_height="wrap_content"
-            android:text="Username"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:background="@drawable/bg_glass_card"
+            android:elevation="12dp">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            <!-- Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome Back"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="6dp" />
 
-        <EditText
-            android:id="@+id/edtu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
+            <!-- Subtitle -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign in to continue your health journey"
+                android:textSize="13sp"
+                android:textColor="#CCFFFFFF"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            <!-- Username -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Username"
+                android:layout_marginBottom="14dp"
+                app:startIconDrawable="@drawable/ic_mail"
+                app:startIconTint="@android:color/white">
 
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Name"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/loginUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/bg_input_glass" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            <!-- Password -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/passwordLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:layout_marginBottom="20dp"
+                app:startIconDrawable="@drawable/ic_lock"
+                app:startIconTint="@android:color/white"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_eye"
+                app:endIconTint="@android:color/white">
 
-        <EditText
-            android:id="@+id/edtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/loginPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:inputType="textPassword"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/bg_input_glass" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            <!-- Login Button -->
+            <Button
+                android:id="@+id/loginButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Sign In"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:background="@drawable/bg_login_button" />
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Password"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            <!-- Divider -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:background="#44FFFFFF" />
 
-        <EditText
-            android:id="@+id/edtp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="textPassword"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  Or continue with  "
+                    android:textSize="12sp"
+                    android:textColor="#CCFFFFFF" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:background="#44FFFFFF" />
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Confirm Password"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            <!-- Social Login Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+                <!-- Google -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="6dp"
+                    app:cardBackgroundColor="@android:color/white">
 
-        <EditText
-            android:id="@+id/edtpc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="textPassword"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_google"
+                        android:padding="14dp"
+                        android:scaleType="centerInside" />
+                </com.google.android.material.card.MaterialCardView>
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_weight="0.15" />
+                <!-- Facebook -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="6dp"
+                    app:cardBackgroundColor="#1877F2">
 
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Email"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_facebook"
+                        android:tint="@android:color/white"
+                        android:padding="14dp"
+                        android:scaleType="centerInside" />
+                </com.google.android.material.card.MaterialCardView>
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/edte"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="text"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_weight="0.15" />
-
-        <TextView
-            android:id="@+id/tvw"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Age"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-
-        <EditText
-            android:id="@+id/edta"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="number"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_weight="0.15" />
-
-        <TextView
-            android:id="@+id/tvl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Height"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-
-        <EditText
-            android:id="@+id/edth"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="number"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-
-        <TextView
-            android:id="@+id/textView7"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Weight"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-
-        <EditText
-            android:id="@+id/edtw"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/textinputborder"
-            android:ems="10"
-            android:inputType="number"
-            android:paddingLeft="15dp"
-            android:textColor="@android:color/black" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_weight="0.15" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Gender"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_weight="0.15" />
-
-        <Spinner
-            android:id="@+id/SGender"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="15dp"
-            android:layout_weight="0.15" />
-
-        <ImageButton
-            android:id="@+id/Login"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginBottom="40dp"
-            android:backgroundTint="@android:color/transparent"
-            app:srcCompat="@mipmap/enter" />
-
+        </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+
+</FrameLayout>

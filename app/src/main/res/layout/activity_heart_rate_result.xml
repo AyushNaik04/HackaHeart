@@ -1,56 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_heart_rate_result"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:paddingLeft="64dp"
-    android:paddingTop="16dp"
-    android:paddingRight="64dp"
-    android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.AboutApp">
+    android:background="@drawable/gradient_anim"
+    android:fillViewport="true"
+    android:padding="24dp">
 
-
-    <ImageView
-        android:id="@+id/imageView6"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:scaleType="fitCenter"
-        app:srcCompat="@mipmap/hrl" />
+        android:layout_height="wrap_content"
+        android:gravity="center">
 
-    <TextView
-        android:id="@+id/HRR"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@android:color/transparent"
-        android:text=""
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <TextView
+            android:id="@+id/heartRateTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Heart Rate Result"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="24dp"/>
 
-    <ImageView
-        android:id="@+id/imageView5"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginBottom="140dp"
-        app:srcCompat="@mipmap/hrbar" />
+        <!-- Resting Heart Rate -->
+        <TextView
+            android:id="@+id/HRR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Resting Heart Rate: -- bpm"
+            android:textSize="20sp"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="16dp"/>
 
-    <ImageButton
-        android:id="@+id/SendHR"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:layout_marginBottom="40dp"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        app:srcCompat="@mipmap/send" />
+        <!-- Max Heart Rate -->
+        <TextView
+            android:id="@+id/MHR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Max Heart Rate: -- bpm"
+            android:textSize="20sp"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="16dp"/>
 
+        <!-- Average Heart Rate -->
+        <TextView
+            android:id="@+id/AHR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Average Heart Rate: -- bpm"
+            android:textSize="20sp"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="24dp"/>
 
-</LinearLayout>
+        <!-- Optional: Button to return or save -->
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            android:background="@drawable/btn_login_primary"
+            android:textColor="@color/buttonTextColor"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>

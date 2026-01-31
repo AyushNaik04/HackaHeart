@@ -2,10 +2,18 @@
     <string name="app_name">HealthWatcher</string>
     <string name="msg">Please enable all permission</string>
 
+    <!-- Gender options -->
     <string-array name="Gender">
         <item>Male</item>
         <item>Female</item>
-
     </string-array>
 
+    <!-- Meal timings for glucose adjustment -->
+    <string-array name="meal_times">
+        <item>Fasting</item>
+        <item>Breakfast</item>
+        <item>Lunch</item>
+        <item>Dinner</item>
+        <item>Snack</item>
+    </string-array>
 </resources>

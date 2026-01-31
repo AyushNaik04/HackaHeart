@@ -1,35 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:paddingLeft="64dp"
-    android:paddingTop="16dp"
-    android:paddingRight="64dp"
-    android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.HeartRateProcess">
+    android:background="@drawable/gradient_anim"
+    android:padding="24dp"
+    android:clipToPadding="false">
 
-
+    <!-- Camera preview for heart rate -->
     <SurfaceView
         android:id="@+id/preview"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"></SurfaceView>
+        android:layout_weight="1"
+        android:background="@drawable/textinputborder" />
 
+    <!-- Circular progress for HR -->
     <ProgressBar
         android:id="@+id/HRPB"
-
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:indeterminate="false"
-        android:max="26"
-        android:progress="1"
-        android:progressDrawable="@drawable/circular_progressbar" />
+        android:max="200"
+        android:progress="0"
+        android:progressDrawable="@drawable/circular_progressbar"
+        android:layout_marginTop="32dp" />
 
 </LinearLayout>

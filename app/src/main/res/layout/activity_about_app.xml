@@ -1,37 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_about_app"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.AboutApp">
+    android:background="@drawable/gradient_anim"
+    android:padding="24dp">
 
-    <ImageView
-        android:id="@+id/imageView4"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/logo" />
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-    <TextView
-        android:id="@+id/textView9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="89dp"
-        android:fontFamily="cursive"
-        android:text="This Application was made as a graduation project at Princess Sumaya university for Technology by \n Yahya Odeh and Talal Kudmani"
-        android:textAlignment="center"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="30sp"
-        android:textStyle="bold" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/textViewAboutTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="About HealthWatcher"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/textViewAboutContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="HealthWatcher helps monitor your vital signs with precision and ease..."
+            android:textColor="@color/textSecondary"
+            android:textSize="16sp"
+            android:lineSpacingExtra="4dp"
+            android:gravity="start"/>
+
+        <ImageView
+            android:id="@+id/imageViewAbout"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="24dp"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="centerInside"/>
+    </LinearLayout>
+</ScrollView>

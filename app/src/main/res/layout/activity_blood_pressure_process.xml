@@ -1,35 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:paddingLeft="64dp"
-    android:paddingTop="16dp"
-    android:paddingRight="64dp"
-    android:paddingBottom="16dp"
-    tools:context="com.example.yo7a.healthwatcher.BloodPressureProcess">
-
+    android:background="@drawable/gradient_anim"
+    android:padding="24dp">
 
     <SurfaceView
         android:id="@+id/preview"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@drawable/textinputborder"/>
 
     <ProgressBar
         android:id="@+id/BPPB"
-
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
-        android:indeterminate="false"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:progressDrawable="@drawable/circular_progressbar"
         android:max="26"
         android:progress="1"
-        android:progressDrawable="@drawable/circular_progressbar" />
-
-
+        android:layout_marginTop="32dp"/>
 </LinearLayout>
+

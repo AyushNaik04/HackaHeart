@@ -1,273 +1,264 @@
 package com.example.yo7a.healthwatcher;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.healthwatcher.Math.Fft;
-
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static java.lang.Math.ceil;
 
 public class HeartRateProcess extends Activity {
 
-    // Variables Initialization
-    private static final String TAG = "HeartRateMonitor";
+    private static final String TAG = "HeartRateProcess";
     private static final AtomicBoolean processing = new AtomicBoolean(false);
-    private SurfaceView preview = null;
-    private static SurfaceHolder previewHolder = null;
-    private static Camera camera = null;
-    private static WakeLock wakeLock = null;
 
-    //Toast
+    private SurfaceView preview;
+    private SurfaceHolder previewHolder;
+    private Camera camera;
+    private PowerManager.WakeLock wakeLock;
+    private ProgressBar progHR;
     private Toast mainToast;
+    private String user;
 
-    //Beats variable
-    public int Beats = 0;
-    public double bufferAvgB = 0;
+    private final ArrayList<Double> greenList = new ArrayList<>();
+    private final ArrayList<Double> redList = new ArrayList<>();
+    private long startTime;
+    private int frameCount = 0;
+    private double samplingFreq = 0.0;
 
-    //DataBase
-    public String user;
+    private final Deque<Integer> recentBpms = new ArrayDeque<>(6);
+    private double emaBpm = -1.0;
 
-    //ProgressBar
-    private ProgressBar ProgHeart;
-    public int ProgP = 0;
-    public int inc = 0;
-
-    //Freq + timer variable
-    private static long startTime = 0;
-    private double SamplingFreq;
-
-    //Arraylist
-    public ArrayList<Double> GreenAvgList = new ArrayList<Double>();
-    public ArrayList<Double> RedAvgList = new ArrayList<Double>();
-    public int counter = 0;
+    private static final double MIN_SECONDS = 8.0;
+    private static final double MAX_SECONDS = 30.0;
+    private static final int MIN_FRAMES = 40;
+    private static final int MIN_BPM = 40;
+    private static final int MAX_BPM = 200;
+    private static final double SNR_THRESHOLD = 4.0;
+    private static final double STABLE_DELTA = 3.0;
+    private static final int STABLE_COUNT = 3;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heart_rate_process);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            user = extras.getString("Usr");
-            //The key argument here must match that used in the other activity
-        }
+        user = getIntent().getStringExtra("Usr");
 
-        // XML - Java Connecting
         preview = findViewById(R.id.preview);
         previewHolder = preview.getHolder();
         previewHolder.addCallback(surfaceCallback);
-        previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        ProgHeart = findViewById(R.id.HRPB);
-        ProgHeart.setProgress(0);
 
-        // WakeLock Initialization : Forces the phone to stay On
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
+        progHR = findViewById(R.id.HRPB);
+        if (progHR != null) progHR.setProgress(0);
+
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        if (pm != null) wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "HealthWatcher:HR");
     }
 
-    //Prevent the system from restarting your activity during certain configuration changes,
-    // but receive a callback when the configurations do change, so that you can manually update your activity as necessary.
-    //such as screen orientation, keyboard availability, and language
-
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
-
-    //Wakelock + Open device camera + set orientation to 90 degree
-    //store system time as a start time for the analyzing process
-    //your activity to start interacting with the user.
-    // This is a good place to begin animations, open exclusive-access devices (such as the camera)
-    @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
-        wakeLock.acquire();
-        camera = Camera.open();
-        camera.setDisplayOrientation(90);
+        try { if (wakeLock != null && !wakeLock.isHeld()) wakeLock.acquire(); } catch (Exception ignored) {}
+        try {
+            camera = Camera.open();
+            camera.setDisplayOrientation(90);
+        } catch (Exception e) {
+            showToast("Camera not available");
+            finish();
+            return;
+        }
         startTime = System.currentTimeMillis();
+        resetBuffers();
     }
 
-    //call back the frames then release the camera + wakelock and Initialize the camera to null
-    //Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been killed. The counterpart to onResume().
-    //When activity B is launched in front of activity A,
-    // this callback will be invoked on A. B will not be created until A's onPause() returns, so be sure to not do anything lengthy here.
     @Override
-    public void onPause() {
+    protected void onPause() {
         super.onPause();
-        wakeLock.release();
-        camera.setPreviewCallback(null);
-        camera.stopPreview();
-        camera.release();
-        camera = null;
+        try { if (wakeLock != null && wakeLock.isHeld()) wakeLock.release(); } catch (Exception ignored) {}
+        releaseCamera();
     }
 
-    //getting frames data from the camera and start the heartbeat process
-    private final PreviewCallback previewCallback = new PreviewCallback() {
+    private void releaseCamera() {
+        if (camera != null) {
+            try { camera.setPreviewCallback(null); } catch (Exception ignored) {}
+            try { camera.stopPreview(); } catch (Exception ignored) {}
+            try { camera.release(); } catch (Exception ignored) {}
+            camera = null;
+        }
+    }
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onPreviewFrame(byte[] data, Camera cam) {
-            //if data or size == null ****
-            if (data == null) throw new NullPointerException();
+    private final Camera.PreviewCallback previewCallback = (data, cam) -> {
+        if (data == null || cam == null) return;
+        if (!processing.compareAndSet(false, true)) return;
+
+        try {
             Camera.Size size = cam.getParameters().getPreviewSize();
-            if (size == null) throw new NullPointerException();
+            if (size == null) { processing.set(false); return; }
 
-            //Atomically sets the value to the given updated value if the current value == the expected value.
-            if (!processing.compareAndSet(false, true)) return;
+            double green = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data, size.width, size.height, 3);
+            double red = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data, size.width, size.height, 1);
 
-            //put width + height of the camera inside the variables
-            int width = size.width;
-            int height = size.height;
-
-            double GreenAvg;
-            double RedAvg;
-
-            GreenAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 3); //1 stands for red intensity, 2 for blue, 3 for green
-            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1); //1 stands for red intensity, 2 for blue, 3 for green
-
-            GreenAvgList.add(GreenAvg);
-            RedAvgList.add(RedAvg);
-
-            ++counter; //countes number of frames in 30 seconds
-
-
-            //To check if we got a good red intensity to process if not return to the condition and set it again until we get a good red intensity
-            if (RedAvg < 200) {
-                inc = 0;
-                ProgP = inc;
-                counter = 0;
-                ProgHeart.setProgress(ProgP);
+            if (green < 35 || red < 35) {
+                if (frameCount == 0) showToast("Place finger firmly on camera");
                 processing.set(false);
+                return;
             }
 
-            long endTime = System.currentTimeMillis();
-            double totalTimeInSecs = (endTime - startTime) / 1000d; //to convert time to seconds
-            if (totalTimeInSecs >= 30) { //when 30 seconds of measuring passes do the following " we chose 30 seconds to take half sample since 60 seconds is normally a full sample of the heart beat
+            greenList.add(green);
+            redList.add(red);
+            frameCount++;
 
-                Double[] Green = GreenAvgList.toArray(new Double[GreenAvgList.size()]);
-                Double[] Red = RedAvgList.toArray(new Double[RedAvgList.size()]);
+            double elapsedSec = (System.currentTimeMillis() - startTime) / 1000.0;
+            samplingFreq = frameCount / Math.max(elapsedSec, 0.001);
 
-                SamplingFreq = (counter / totalTimeInSecs); //calculating the sampling frequency
+            // Update progress
+            if (progHR != null) {
+                int p = Math.min(100, (int) Math.round(Math.min(elapsedSec / MAX_SECONDS, 1.0) * 100.0));
+                progHR.setProgress(p);
+            }
 
-                double HRFreq = Fft.FFT(Green, counter, SamplingFreq); // send the green array and get its fft then return the amount of heartrate per second
-                double bpm = (int) ceil(HRFreq * 60);
-                double HR1Freq = Fft.FFT(Red, counter, SamplingFreq);  // send the red array and get its fft then return the amount of heartrate per second
-                double bpm1 = (int) ceil(HR1Freq * 60);
+            if (elapsedSec >= MIN_SECONDS && frameCount >= MIN_FRAMES) {
+                // Limit window to MAX_SECONDS
+                int maxFrames = (int)(MAX_SECONDS * samplingFreq);
+                while (greenList.size() > maxFrames) { greenList.remove(0); redList.remove(0); frameCount--; }
 
-                // The following code is to make sure that if the heartrate from red and green intensities are reasonable
-                // take the average between them, otherwise take the green or red if one of them is good
+                double[] samples = greenList.stream().mapToDouble(d -> d).toArray();
+                SignalProcessing.removeLinearTrend(samples);
+                SignalProcessing.applyHammingWindow(samples);
 
-                if ((bpm > 45 || bpm < 200)) {
-                    if ((bpm1 > 45 || bpm1 < 200)) {
+                double[] outSNR = new double[1];
+                double freqHz = SignalProcessing.findDominantFrequencyHz(samples, samplingFreq, 0.7, 4.0, outSNR);
+                double snr = outSNR[0];
 
-                        bufferAvgB = (bpm + bpm1) / 2;
-                    } else {
-                        bufferAvgB = bpm;
-                    }
-                } else if ((bpm1 > 45 || bpm1 < 200)) {
-                    bufferAvgB = bpm1;
+                if (Double.isNaN(freqHz) || freqHz <= 0 || snr < SNR_THRESHOLD) {
+                    samples = redList.stream().mapToDouble(d -> d).toArray();
+                    SignalProcessing.removeLinearTrend(samples);
+                    SignalProcessing.applyHammingWindow(samples);
+                    freqHz = SignalProcessing.findDominantFrequencyHz(samples, samplingFreq, 0.7, 4.0, outSNR);
+                    snr = outSNR[0];
                 }
 
-                if (bufferAvgB < 45 || bufferAvgB > 200) { //if the heart beat wasn't reasonable after all reset the progresspag and restart measuring
-                    inc = 0;
-                    ProgP = inc;
-                    ProgHeart.setProgress(ProgP);
-                    mainToast = Toast.makeText(getApplicationContext(), "Measurement Failed", Toast.LENGTH_SHORT);
-                    mainToast.show();
-                    startTime = System.currentTimeMillis();
-                    counter = 0;
+                int bpm = (freqHz > 0) ? (int)Math.round(freqHz * 60.0) : 0;
+                if (bpm < MIN_BPM || bpm > MAX_BPM || snr < SNR_THRESHOLD) {
+                    if (elapsedSec >= MAX_SECONDS) showToast("Measurement failed — reposition finger");
                     processing.set(false);
                     return;
                 }
 
-                Beats = (int) bufferAvgB;
+                emaBpm = (emaBpm < 0) ? bpm : 0.45 * bpm + 0.55 * emaBpm;
+
+                if (recentBpms.size() == 6) recentBpms.pollFirst();
+                recentBpms.offerLast((int)Math.round(emaBpm));
+
+                int finalBpm = medianOfDeque(recentBpms);
+                if (checkStability(recentBpms, STABLE_DELTA, STABLE_COUNT) || elapsedSec >= MAX_SECONDS) {
+                    Intent i = new Intent(HeartRateProcess.this, HeartRateResult.class);
+                    i.putExtra("BPM", finalBpm);
+                    i.putExtra("Usr", user);
+                    startActivity(i);
+                    finish();
+                    resetBuffers();
+                }
             }
 
-            if (Beats != 0) { //if beasts were reasonable stop the loop and send HR with the username to results activity and finish this activity
-                Intent i = new Intent(HeartRateProcess.this, HeartRateResult.class);
-                i.putExtra("bpm", Beats);
-                i.putExtra("Usr", user);
-                startActivity(i);
-                finish();
-            }
-
-
-            if (RedAvg != 0) { //increment the progresspar
-
-                ProgP = inc++ / 34;
-                ProgHeart.setProgress(ProgP);
-            }
-
-            //keeps taking frames tell 30 seconds
+        } catch (Exception e) {
+            Log.e(TAG, "Preview callback error", e);
+        } finally {
             processing.set(false);
-
         }
     };
 
     private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
-
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
-                camera.setPreviewDisplay(previewHolder);
-                camera.setPreviewCallback(previewCallback);
-            } catch (Throwable t) {
-                Log.e("PreviewDemo-surfaceCallback", "Exception in setPreviewDisplay()", t);
-            }
+                if (camera != null) {
+                    camera.setPreviewDisplay(previewHolder);
+                    camera.setPreviewCallback(previewCallback);
+                }
+            } catch (Exception e) { Log.e(TAG, "Preview setup error", e); }
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-            Camera.Parameters parameters = camera.getParameters();
-            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-
-            Camera.Size size = getSmallestPreviewSize(width, height, parameters);
-            if (size != null) {
-                parameters.setPreviewSize(size.width, size.height);
-                Log.d(TAG, "Using width=" + size.width + " height=" + size.height);
-            }
-
-            camera.setParameters(parameters);
-            camera.startPreview();
+            if (camera == null) return;
+            try {
+                Camera.Parameters params = camera.getParameters();
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                Camera.Size size = getSmallestPreviewSize(width, height, params);
+                if (size != null) params.setPreviewSize(size.width, size.height);
+                camera.setParameters(params);
+                camera.startPreview();
+            } catch (Exception e) { Log.e(TAG, "Camera preview error", e); }
         }
-
 
         @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-        }
+        public void surfaceDestroyed(SurfaceHolder holder) {}
     };
 
-    private static Camera.Size getSmallestPreviewSize(int width, int height, Camera.Parameters parameters) {
+    private static Camera.Size getSmallestPreviewSize(int width, int height, Camera.Parameters params) {
         Camera.Size result = null;
-        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
-            if (size.width <= width && size.height <= height) {
-                if (result == null) {
-                    result = size;
-                } else {
-                    int resultArea = result.width * result.height;
-                    int newArea = size.width * size.height;
-                    if (newArea < resultArea) result = size;
-                }
+        for (Camera.Size s : params.getSupportedPreviewSizes()) {
+            if (s.width <= width && s.height <= height) {
+                if (result == null || s.width * s.height < result.width * result.height) result = s;
             }
         }
         return result;
     }
+
+    private void resetBuffers() {
+        greenList.clear();
+        redList.clear();
+        frameCount = 0;
+        startTime = System.currentTimeMillis();
+        samplingFreq = 0;
+        recentBpms.clear();
+        emaBpm = -1;
+        if (progHR != null) progHR.setProgress(0);
+    }
+
+    private void showToast(String msg) {
+        if (mainToast != null) mainToast.cancel();
+        mainToast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT);
+        mainToast.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this, StartVitalSigns.class);
+        i.putExtra("Usr", user);
+        startActivity(i);
+        finish();
+    }
+
+    private int medianOfDeque(Deque<Integer> dq) {
+        int n = dq.size();
+        int[] arr = new int[n];
+        int idx = 0;
+        for (int v : dq) arr[idx++] = v;
+        java.util.Arrays.sort(arr);
+        return arr[n/2];
+    }
+
+    private boolean checkStability(Deque<Integer> dq, double delta, int count) {
+        if (dq.size() < count) return false;
+        Integer[] arr = dq.toArray(new Integer[0]);
+        int len = arr.length;
+        int start = len - count;
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        for (int i = start; i < len; i++) { min = Math.min(min, arr[i]); max = Math.max(max, arr[i]); }
+        return (max - min) <= delta;
+    }
 }
+
+

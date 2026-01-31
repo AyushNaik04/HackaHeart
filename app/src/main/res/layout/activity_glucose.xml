@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_layout_glucose"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_anim"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/glucoseTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Glucose Measurement"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/textPrimary"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Circular Progress with percentage -->
+    <FrameLayout
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginBottom="24dp">
+
+        <ProgressBar
+            android:id="@+id/prog_glucose"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/circular_progressbar"/>
+
+        <TextView
+            android:id="@+id/text_percent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="0%"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/textPrimary"/>
+    </FrameLayout>
+
+    <!-- Glucose result -->
+    <TextView
+        android:id="@+id/text_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Estimated Glucose will appear here"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/textPrimary"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Pulse -->
+    <TextView
+        android:id="@+id/text_pulse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pulse: -- BPM"
+        android:textSize="18sp"
+        android:textColor="@color/textPrimary"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Send button -->
+    <ImageButton
+        android:id="@+id/button_send_glucose"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@android:drawable/ic_menu_send"
+        android:background="@drawable/rounded_button"
+        android:contentDescription="Send via Email"
+        android:layout_marginTop="8dp"
+        android:elevation="6dp"/>
+
+</LinearLayout>

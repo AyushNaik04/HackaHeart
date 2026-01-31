@@ -1,33 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
     android:orientation="vertical"
-    android:paddingLeft="64dp"
-    android:paddingTop="16dp"
-    android:paddingRight="64dp"
-    android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.VitalSignsProcess">
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@drawable/gradient_anim">
 
+    <TextView
+        android:id="@+id/vitalSignsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Measuring Vital Signs..."
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/textPrimary"
+        android:layout_marginBottom="24dp"/>
 
     <SurfaceView
         android:id="@+id/preview"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginBottom="24dp"/>
 
     <ProgressBar
         android:id="@+id/VSPB"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
-        android:indeterminate="false"
-        android:max="26"
-        android:progress="1"
-        android:progressDrawable="@drawable/circular_progressbar" />
-
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="0"
+        android:layout_marginTop="16dp"
+        android:progressDrawable="@drawable/circular_progressbar"/>
 </LinearLayout>
